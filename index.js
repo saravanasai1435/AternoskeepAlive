@@ -1,40 +1,39 @@
 const mineflayer = require('mineflayer');
-const axios = require('axios');
 
-const SERVER_HOST = 'saravanasai173.aternos.me';
-const SERVER_PORT = 12934;
-const USERNAME = 'MyBot';
-
-// Fetch the dynamic IP from Aternos status API
-async function getServerIP() {
-  try {
-    const res = await axios.get(`https://mcapi.us/server/status?ip=${SERVER_HOST}&port=${SERVER_PORT}`);
-    if (res.data.online && res.data.host) {
-      console.log('Server IP found:', res.data.host);
-      return res.data.host;
-    } else {
-      throw new Error('Server offline or IP not ready');
-    }
-  } catch {
-    console.log('Server not ready, retrying in 10s...');
-    await new Promise(r => setTimeout(r, 10000));
-    return getServerIP();
-  }
-}
-
-async function startBot() {
-  const ip = await getServerIP();
-
+function createBot() {
   const bot = mineflayer.createBot({
-    host: ip,
-    port: SERVER_PORT,
-    username: USERNAME,
+    host: 'saravanasai173.aternos.me', // your Aternos IP
+    port: 12934,                        // your server port
+    username: 'BotAccount123',          // use a separate account
   });
 
-  bot.once('spawn', () => console.log('Bot spawned!'));
-  bot.on('chat', (u, msg) => { if (u !== bot.username) console.log(`<${u}> ${msg}`); });
-  bot.on('end', () => { console.log('Disconnected, reconnecting...'); setTimeout(startBot, 10000); });
-  bot.on('error', err => console.log('Error:', err.message));
+  bot.on('login', () => {
+    console.log('✅ Bot logged in!');
+  });
+
+  bot.on('spawn', () => {
+    console.log('🌎 Bot spawned in the world!');
+  });
+
+  bot.on('end', (reason) => {
+    console.log('❌ Bot disconnected:', reason);
+    console.log('⏳ Reconnecting in 5 seconds...');
+    setTimeout(createBot, 5000); // reconnect after 5s
+  });
+
+  bot.on('kicked', (reason) => {
+    console.log('⚠️ Bot was kicked:', reason);
+    console.log('⏳ Reconnecting in 5 seconds...');
+    setTimeout(createBot, 5000); // reconnect after 5s
+  });
+
+  bot.on('error', (err) => {
+    console.log('💥 Bot error:', err);
+  });
+
+  bot.on('chat', (username, message) => {
+    console.log(`${username}: ${message}`);
+  });
 }
 
-startBot();
+createBot();
