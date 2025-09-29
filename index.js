@@ -1,16 +1,17 @@
 const mineflayer = require('mineflayer');
 
 const bot = mineflayer.createBot({
-  host: 'play.example.com', // server IP
-  port: 25565,              // server port
-  username: 'YourBotName'
+  host: 'saravanasai173.aternos.me:12934', // Replace with your server's IP
+  port: 12934,       // Default Minecraft port
+  username: 'Botup', // Your Minecraft username
+  password: 'your_password'    // Optional, if using a Mojang account
 });
 
 bot.on('spawn', () => {
-  console.log('Bot has spawned in the server!');
+  console.log('Bot has spawned!');
 });
 
 bot.on('chat', (username, message) => {
   if (username === bot.username) return;
-  console.log(`${username}: ${message}`);
+  bot.chat(`Hello, ${username}! You said: ${message}`);
 });
