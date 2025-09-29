@@ -1,36 +1,49 @@
-// index.js
 const mineflayer = require('mineflayer');
+const axios = require('axios');
 
-// === CONFIG ===
-const HOST = 'saravanasai173.aternos.me'; // replace with your Aternos IP
-const PORT = 12934;                  // replace with your Aternos port
-const USERNAME = 'MyBot';            // bot username
+const SERVER_HOST = 'saravanasai173.aternos.me'; // just the host, no port here
+const SERVER_PORT = 12934;                        // port separate
+const USERNAME = 'MyBot';
 
+// Wait until server responds
+async function waitForServer() {
+  console.log('Checking if server is online...');
+  let online = false;
+
+  while (!online) {
+    try {
+      await axios.get(`https://mcapi.us/server/status?ip=${SERVER_HOST}&port=${SERVER_PORT}`);
+      online = true;
+      console.log('Server is online! Connecting bot...');
+    } catch (err) {
+      console.log('Server not ready yet, retrying in 10s...');
+      await new Promise(res => setTimeout(res, 10000));
+    }
+  }
+}
+
+// Create the Mineflayer bot
 function createBot() {
   const bot = mineflayer.createBot({
-    host: HOST,
-    port: PORT,
+    host: SERVER_HOST,
+    port: SERVER_PORT,
     username: USERNAME,
   });
 
-  // Log when bot spawns
   bot.once('spawn', () => {
-    console.log(`Bot has spawned in the server!`);
+    console.log('Bot has spawned in the server!');
   });
 
-  // Log chat messages
   bot.on('chat', (username, message) => {
-    if (username === bot.username) return; // ignore bot's own messages
+    if (username === bot.username) return;
     console.log(`<${username}> ${message}`);
   });
 
-  // Auto reconnect if disconnected
   bot.on('end', () => {
-    console.log('Disconnected from server. Reconnecting in 10s...');
-    setTimeout(createBot, 10000); // restart bot after 10 seconds
+    console.log('Disconnected. Reconnecting in 10s...');
+    setTimeout(createBot, 10000);
   });
 
-  // Error handling
   bot.on('error', (err) => {
     console.log('Error:', err.message);
   });
@@ -38,5 +51,8 @@ function createBot() {
   return bot;
 }
 
-// Start the bot
-createBot();
+// Start the process
+(async () => {
+  await waitForServer();
+  createBot();
+})();
