@@ -1,7 +1,7 @@
 const mineflayer = require('mineflayer');
 
 const bot = mineflayer.createBot({
-  host: 'saravanasai173.aternos.me:12934', // Replace with your server's IP
+  host: 'saravanasai173.aternos.me', // Replace with your server's IP
   port: 12934,       // Default Minecraft port
   username: 'Botup', // Your Minecraft username
   password: 'your_password'    // Optional, if using a Mojang account
